@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Perfil } from "../types/perfil";
 
-const API_URL = "http://localhost:3000/perfiles"; // tu JSON Server
+const PERFILES_KEY = "@tinder_app:perfiles";
 
 export function usePerfiles() {
   const [perfiles, setPerfiles] = useState<Perfil[]>([]);
@@ -15,8 +15,12 @@ export function usePerfiles() {
   const cargarPerfiles = async () => {
     try {
       setCargando(true);
-      const { data } = await axios.get<Perfil[]>(API_URL);
-      setPerfiles(data);
+      const perfilesJson = await AsyncStorage.getItem(PERFILES_KEY);
+      if (perfilesJson) {
+        setPerfiles(JSON.parse(perfilesJson));
+      } else {
+        await inicializarPerfiles(); // si no hay nada, inicializa
+      }
     } catch (error) {
       console.error("❌ Error cargando perfiles:", error);
     } finally {
@@ -24,22 +28,32 @@ export function usePerfiles() {
     }
   };
 
-  const darLike = async (id: string) => {
+  const guardarPerfiles = async (nuevos: Perfil[]) => {
     try {
-      await axios.post(`${API_URL}/${id}/like`);
-      setPerfiles(prev => prev.filter(p => p.id !== id));
+      await AsyncStorage.setItem(PERFILES_KEY, JSON.stringify(nuevos));
+      setPerfiles(nuevos);
     } catch (error) {
-      console.error("❌ Error dando like:", error);
+      console.error("❌ Error guardando perfiles:", error);
     }
   };
 
+  const darLike = async (id: string) => {
+    const restantes = perfiles.filter(p => p.id !== id);
+    await guardarPerfiles(restantes);
+  };
+
   const rechazar = async (id: string) => {
-    try {
-      await axios.post(`${API_URL}/${id}/rechazar`);
-      setPerfiles(prev => prev.filter(p => p.id !== id));
-    } catch (error) {
-      console.error("❌ Error rechazando perfil:", error);
-    }
+    const restantes = perfiles.filter(p => p.id !== id);
+    await guardarPerfiles(restantes);
+  };
+
+  const inicializarPerfiles = async () => {
+    const iniciales: Perfil[] = [
+      { id: "1", nombre: "Ana", edad: 24, foto: "https://randomuser.me/api/portraits/women/44.jpg", bio: "Me encanta viajar y los perros 🐶" },
+      { id: "2", nombre: "Carlos", edad: 28, foto: "https://randomuser.me/api/portraits/men/32.jpg", bio: "Fan del cine y la música 🎬🎶" },
+      { id: "3", nombre: "Lucía", edad: 22, foto: "https://randomuser.me/api/portraits/women/65.jpg", bio: "Amante del café y los libros ☕📚" }
+    ];
+    await guardarPerfiles(iniciales);
   };
 
   return { perfiles, cargando, cargarPerfiles, darLike, rechazar };
