@@ -1,15 +1,25 @@
 import { Stack } from "expo-router";
-import { useTema } from "../lib/hooks/useTema";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import "@/global.css";
 
-export default function Layout() {
-  const { temaOscuro } = useTema();
-
+export default function RootLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: temaOscuro ? "#111827" : "#ffffff" },
-      }}
-    />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      >
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="photo/[id]"
+          options={{
+            presentation: "modal",
+            animation: "fade",
+          }}
+        />
+      </Stack>
+    </GestureHandlerRootView>
   );
 }
