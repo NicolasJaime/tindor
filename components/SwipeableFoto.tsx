@@ -1,11 +1,9 @@
 import React from "react";
 import { View } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
 import FotoBase from "./FotoBase";
 import OverlayAcciones from "./OverlayAcciones";
 import IndicadoresFlotantes from "./IndicadoresFlotantes";
-import Animated, { useSharedValue } from "react-native-reanimated";
-
-const UMBRAL_SWIPE = 120; // puedes ajustar el umbral
 
 interface SwipeableFotoProps {
   uri: string;
@@ -14,18 +12,22 @@ interface SwipeableFotoProps {
 }
 
 export default function SwipeableFoto({ uri, onSwipeLeft, onSwipeRight }: SwipeableFotoProps) {
-  // valores compartidos para animaciones
+  // 1. Creamos el valor compartido AQUÍ
   const translateX = useSharedValue(0);
 
   return (
     <View className="flex-1 justify-center items-center bg-black">
-      {/* Foto con gestos */}
-      <FotoBase uri={uri} onSwipeLeft={onSwipeLeft} onSwipeRight={onSwipeRight}>
-        {/* Overlays de acciones */}
-        <OverlayAcciones translateX={translateX} umbral={UMBRAL_SWIPE} />
+      {/* 2. Se lo pasamos a FotoBase para que lo controle el gesto */}
+      <FotoBase 
+        uri={uri} 
+        onSwipeLeft={onSwipeLeft} 
+        onSwipeRight={onSwipeRight} 
+        translateX={translateX} 
+      >
+        {/* 3. Se lo pasamos a los overlays para que reaccionen al mismo valor */}
+        <OverlayAcciones translateX={translateX} umbral={120} />
       </FotoBase>
 
-      {/* Indicadores flotantes */}
       <IndicadoresFlotantes />
     </View>
   );

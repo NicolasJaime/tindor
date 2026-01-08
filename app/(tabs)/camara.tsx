@@ -53,18 +53,17 @@ export default function CamaraScreen() {
 
   const swipeIzquierda = () => {
     if (fotoUri) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      // No saturemos con tantos Haptics si ya los pusimos en el componente FotoBase
       enviarABasura(fotoUri, dimensiones.ancho, dimensiones.alto);
+      setFotoUri(null); // Esto desmonta el SwipeableFoto
     }
-    setFotoUri(null);
   };
 
   const swipeDerecha = () => {
     if (fotoUri) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       guardarEnGaleria(fotoUri, dimensiones.ancho, dimensiones.alto);
+      setFotoUri(null);
     }
-    setFotoUri(null);
   };
 
   const cambiarCamara = () => {
